@@ -1,0 +1,40 @@
+# Maven
+target/
+*.jar
+*.war
+*.class
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# Node
+node_modules/
+dist/
+.vite/
+*.local
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.tmp
+
+# Docs/Reports (not to be committed)
+*.docx
+*.pdf
+*.txt
+!README.md
+
+# Python scripts
+*.py
+
+# Temp
+temp/
+tmpCode/
+
+# Logs
+*.log

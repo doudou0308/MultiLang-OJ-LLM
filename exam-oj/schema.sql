@@ -1,0 +1,57 @@
+-- exam-oj 数据库建表脚本
+CREATE DATABASE IF NOT EXISTS exam_oj DEFAULT CHARSET utf8mb4;
+USE exam_oj;
+
+CREATE TABLE IF NOT EXISTS user (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    password VARCHAR(200) NOT NULL,
+    avatar VARCHAR(500) DEFAULT NULL,
+    signature VARCHAR(200) DEFAULT NULL,
+    tags VARCHAR(500) DEFAULT NULL,
+    sex INT DEFAULT 0,
+    role VARCHAR(20) NOT NULL DEFAULT 'user',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS problem (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    content TEXT NOT NULL,
+    difficulty VARCHAR(20) NOT NULL DEFAULT '简单',
+    tags VARCHAR(500) DEFAULT NULL,
+    answer TEXT,
+    judge_case TEXT,
+    judge_config VARCHAR(200) DEFAULT NULL,
+    submit_num INT DEFAULT 0,
+    accepted_num INT DEFAULT 0,
+    thumb_num INT DEFAULT 0,
+    favour_num INT DEFAULT 0,
+    user_id BIGINT NOT NULL,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS problem_submit (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    problem_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    language VARCHAR(20) NOT NULL,
+    code TEXT NOT NULL,
+    judge_info TEXT,
+    status INT DEFAULT 0,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_problem (problem_id),
+    KEY idx_user (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS check_in (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    date DATE NOT NULL,
+    UNIQUE KEY uk_user_date (user_id, date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
