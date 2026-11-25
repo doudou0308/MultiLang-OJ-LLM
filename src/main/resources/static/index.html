@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Local Judge · 编程评测工作台</title>
+  <link rel="stylesheet" href="/workbench.css">
+  <script type="module" src="/workbench.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand"><span class="brand-icon" aria-hidden="true">{ }</span><span>Local Judge</span></div>
+    <nav aria-label="工作区">
+      <button type="button" data-pane="practice" aria-pressed="true">练习</button>
+      <button type="button" data-pane="author" aria-pressed="false">题目管理</button>
+    </nav>
+  </header>
+  <main>
+    <p id="app-error" class="error" role="alert" hidden></p>
+    <section id="practice" aria-label="练习工作区">
+      <div class="page-title">
+        <div><h1>编程评测工作台</h1><p>阅读题目、运行自测，再提交完整评测。</p></div>
+        <label class="picker">选择题目<select id="exercise-picker"></select></label>
+      </div>
+      <div class="workspace">
+        <article class="card statement-card">
+          <h2 id="exercise-title">题目</h2>
+          <p id="limits" class="muted"></p>
+          <div id="statement" class="statement"></div>
+          <div id="examples"></div>
+        </article>
+        <section class="card editor-card" aria-labelledby="editor-title">
+          <div class="card-heading"><h2 id="editor-title">代码</h2>
+            <label class="picker inline">语言
+              <select id="language"><option value="JAVA">Java</option><option value="C">C</option><option value="CPP">C++</option></select>
+            </label>
+          </div>
+          <textarea id="source" aria-label="源代码" rows="16" maxlength="32000" spellcheck="false"></textarea>
+          <label class="stacked">自测输入<textarea id="trial-input" rows="3" maxlength="8192" spellcheck="false"></textarea></label>
+          <div class="actions">
+            <button type="button" id="try" disabled>运行自测</button>
+            <button type="button" id="submit" class="primary" disabled>提交评测</button>
+          </div>
+          <div id="result" class="result" role="status" aria-live="polite"></div>
+        </section>
+      </div>
+      <section class="card history-card" aria-labelledby="history-title">
+        <div class="card-heading"><h2 id="history-title">提交历史</h2><button type="button" id="refresh">刷新</button></div>
+        <ol id="history" class="history"></ol>
+      </section>
+    </section>
+    <section id="author" aria-labelledby="author-title" hidden>
+      <div class="page-title">
+        <div><h1 id="author-title">题目管理</h1><p>编辑题面、用例和执行规则。</p></div>
+        <label class="picker">编辑题目<select id="author-picker"><option value="">新建题目</option></select></label>
+      </div>
+      <form id="author-form" class="card">
+        <div class="form-grid">
+          <label class="stacked">题目标识<input name="slug" required maxlength="72" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="lantern-count"></label>
+          <label class="stacked">标题<input name="title" required maxlength="120"></label>
+        </div>
+        <label class="stacked">题目说明<textarea name="statement" rows="5" required maxlength="30000"></textarea></label>
+        <div class="form-grid rules">
+          <label class="stacked">时间限制（毫秒）<input name="time" type="number" required min="100" max="5000" value="2000"></label>
+          <label class="stacked">每个输出流限制（字节）<input name="output" type="number" required min="256" max="16384" value="4096"></label>
+          <label class="stacked">比较方式<select name="comparison"><option value="TOKENS">按空白分隔的词比较</option><option value="EXACT">精确比较（统一换行符）</option></select></label>
+        </div>
+        <label id="archive-label" hidden><input name="archived" type="checkbox"> 归档此题</label>
+        <div class="card-heading"><h2>评测用例</h2><button type="button" id="add-case">添加用例</button></div>
+        <div id="cases"></div>
+        <div class="actions"><button class="primary" id="save" type="submit">保存题目</button></div>
+        <p id="author-status" role="status"></p>
+      </form>
+    </section>
+  </main>
+  <template id="case-template">
+    <fieldset class="case-edit">
+      <legend>用例</legend>
+      <div class="form-grid">
+        <label class="stacked">标准输入<textarea name="input" rows="3" maxlength="8192" spellcheck="false"></textarea></label>
+        <label class="stacked">期望输出<textarea name="expected" rows="3" maxlength="8192" spellcheck="false"></textarea></label>
+      </div>
+      <div class="card-heading"><label><input name="example" type="checkbox"> 显示为公开示例</label><button type="button" data-remove>移除用例</button></div>
+    </fieldset>
+  </template>
+</body>
+</html>
