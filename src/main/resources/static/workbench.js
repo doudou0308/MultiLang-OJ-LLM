@@ -24,6 +24,7 @@ let busy = false
 let navigated = 0
 let authorRevision = 0
 let historyRevision = 0
+let resultRevision = 0
 
 async function request(path, { method = 'GET', data } = {}) {
   const response = await fetch(apiRoot + path, {
@@ -144,14 +145,22 @@ async function refreshHistory() {
     const row = node('li')
     const button = node('button', '#' + entry.id + ' · ' + entry.language + ' · ' + verdicts[entry.verdict])
     button.type = 'button'
-    button.addEventListener('click', guarded(async () => {
-      const detail = await request('/attempts/' + entry.id)
-      if (currentExercise !== slug) return
-      showResult(detail.result, false, detail.summary.id)
-      const oldSource = node('details')
-      oldSource.append(node('summary', '查看当时提交的源代码'), node('pre', detail.source))
-      $('result').append(oldSource)
-    }))
+    button.addEventListener('click', async () => {
+      const navigationAtClick = navigated
+      const selection = ++resultRevision
+      const isCurrent = () => navigated === navigationAtClick && selection === resultRevision
+      error()
+      try {
+        const detail = await request('/attempts/' + entry.id)
+        if (!isCurrent()) return
+        showResult(detail.result, false, detail.summary.id)
+        const oldSource = node('details')
+        oldSource.append(node('summary', '查看当时提交的源代码'), node('pre', detail.source))
+        $('result').append(oldSource)
+      } catch (failure) {
+        if (isCurrent()) error(failure.message)
+      }
+    })
     row.append(button, node('time', new Date(entry.submittedAt).toLocaleString()))
     $('history').append(row)
   }
@@ -161,6 +170,7 @@ async function run(trial) {
   if (busy || !currentExercise) return
   const slug = currentExercise
   const revision = navigated
+  const selection = ++resultRevision
   const body = { language: language.value, source: source.value }
   if (trial) body.input = $('trial-input').value
   busy = true
@@ -169,12 +179,14 @@ async function run(trial) {
   try {
     const response = await request('/exercises/' + encodeURIComponent(slug) + (trial ? '/trials' : '/attempts'),
       { method: 'POST', data: body })
-    if (revision === navigated) {
+    if (revision === navigated && selection === resultRevision) {
       showResult(trial ? response : response.result, trial, response.summary?.id)
-      if (!trial) await refreshHistory()
     }
+    if (revision === navigated && !trial) await refreshHistory()
   } catch (failure) {
-    if (revision === navigated) $('result').replaceChildren(node('p', failure.message, 'error'))
+    if (revision === navigated && selection === resultRevision) {
+      $('result').replaceChildren(node('p', failure.message, 'error'))
+    }
   } finally {
     busy = false
     updateButtons()
@@ -273,3 +285,4 @@ $('submit').addEventListener('click', () => run(false))
 $('refresh').addEventListener('click', guarded(refreshHistory))
 $('add-case').addEventListener('click', () => addCase())
 guarded(() => catalog())()
+
