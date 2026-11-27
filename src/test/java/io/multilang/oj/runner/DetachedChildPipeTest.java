@@ -7,15 +7,45 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@EnabledOnOs(OS.LINUX)
 class ProcessRunnerTest {
     @TempDir
     Path directory;
 
     private final ProcessRunner runner = new ProcessRunner();
+
+    @Test
+    void preservesInputOutputAndExitCode() throws IOException, InterruptedException {
+        ProcessRunner.Result result = runner.run(
+                List.of("sh", "-c", "cat; printf 'diagnostic' >&2; exit 7"),
+                directory, "input\n".getBytes(StandardCharsets.UTF_8), 3000, 1024);
+
+        assertEquals(7, result.exitCode());
+        assertEquals("input\n", result.stdout());
+        assertEquals("diagnostic", result.stderr());
+        assertFalse(result.timedOut());
+        assertFalse(result.outputLimit());
+    }
+
+    @Test
+    void preservesTimeoutAndOutputLimit() throws IOException, InterruptedException {
+        ProcessRunner.Result timedOut = runner.run(List.of("sleep", "5"),
+                directory, new byte[0], 100, 1024);
+        assertTrue(timedOut.timedOut());
+        assertFalse(timedOut.outputLimit());
+
+        ProcessRunner.Result truncated = runner.run(List.of("printf", "abcdef"),
+                directory, new byte[0], 3000, 4);
+        assertFalse(truncated.timedOut());
+        assertTrue(truncated.outputLimit());
+        assertEquals("abcd", truncated.stdout());
+    }
 
     @Test
     void returnsWhenDetachedChildKeepsOutputPipesOpen() throws IOException, InterruptedException {
