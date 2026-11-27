@@ -4,7 +4,7 @@
 
 ## 本地启动
 
-需要 JDK 17、Maven 3.6+、MySQL 8，以及 PATH 上的 GCC 和 G++。MySQL 中先建库：
+需要 JDK 17、Maven 3.6+、MySQL 8，以及 PATH 上的 GCC 和 G++。Linux 还需要 PATH 上的 `mkfifo`（通常由 coreutils 提供）。MySQL 中先建库：
 
 ```sql
 CREATE DATABASE local_judge CHARACTER SET utf8mb4;
